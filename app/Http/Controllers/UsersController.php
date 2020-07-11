@@ -10,13 +10,20 @@ class UsersController extends Controller
     //
     public function __construct()
     {
-        $this->middleware('auth',[
-            'except'=>['create','show','store']
+        $this->middleware('auth', [
+            'except' => ['create', 'show', 'store']
         ]);
 
-        $this->middleware('guest',[
-            'only'=>['create']
+        $this->middleware('guest', [
+            'only' => ['create']
         ]);
+    }
+
+    public function index()
+    {
+//        $users = User::all();
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
     }
 
     public function create()
@@ -49,28 +56,28 @@ class UsersController extends Controller
 
     public function edit(User $user)
     {
-        $this->authorize('update',$user);
+        $this->authorize('update', $user);
         return view('users.edit', compact('user'));
 
     }
 
-    public function update(User $user,Request $request)
+    public function update(User $user, Request $request)
     {
-        $this->authorize('update',$user);
+        $this->authorize('update', $user);
 
-        $this->validate($request,[
+        $this->validate($request, [
             'name' => 'required|max:50',
             'password' => 'nullable|confirmed|min:6'
         ]);
 
-        $data=[];
-        $data['name']=$request->name;
-        if($request->password){
-            $data['password']=bcrypt($request->password);
+        $data = [];
+        $data['name'] = $request->name;
+        if ($request->password) {
+            $data['password'] = bcrypt($request->password);
         }
         $user->update($data);
 
-        session()->flash('success','更新成功！');
+        session()->flash('success', '更新成功！');
         return redirect()->route('users.show', $user->id);
     }
 }
